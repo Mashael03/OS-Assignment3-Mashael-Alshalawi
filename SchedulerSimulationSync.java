@@ -118,12 +118,16 @@ class Process implements Runnable {
         this.startTime = -1;
     }
 
+    // TODO #3: Acquire CPU semaphore before executing
+    // Acquire CPU access
+
+    // This ensures only allowed number of processes run simultaneously
+    // Acquire CPU semaphore before executing
     @Override
     public void run() {
-        // TODO #3: Acquire CPU semaphore before executing
-        // This ensures only allowed number of processes run simultaneously
 
         try {
+            SharedResources.cpuSemaphore.acquire();
             if (startTime == -1) {
                 startTime = System.currentTimeMillis();
             }
@@ -182,9 +186,14 @@ class Process implements Runnable {
             }
             System.out.println();
 
-        } finally {
-            // TODO #4: Release CPU semaphore here
-            // Always release in finally block to prevent deadlocks!
+        } catch (InterruptedException e) {
+            System.out.println(Colors.RED + "\n  ✗ " + name + " was interrupted." + Colors.RESET);
+            Thread.currentThread().interrupt();
+        }
+
+        finally {
+            // Release CPU access
+            SharedResources.cpuSemaphore.release();
         }
     }
 
